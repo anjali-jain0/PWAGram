@@ -1,0 +1,22 @@
+{
+  "name": "pwagram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "web-push" : "web-push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anjali-jain0/PWAGram.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anjali-jain0/PWAGram/issues"
+  },
+  "homepage": "https://github.com/anjali-jain0/PWAGram#readme",
+  "dependencies": {
+    "web-push": "^3.3.5"
+  }
+}

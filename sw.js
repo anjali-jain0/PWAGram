@@ -112,5 +112,84 @@ self.addEventListener('fetch' , e => {
 		//}
 });
 
+self.addEventListener('notificationclick' , (e) => {
+
+	var notification = e.notification;
+	var action = e.action;
+
+	console.log(notification);
+	if(action === 'confirm'){
+		console.log('confirm was clicked');
+		notification.close();
+	} else {
+		console.log(action);
+		e.waitUntil(
+			clients.matchAll()
+				.then(clis => {
+					var client = clis.find((c) => {
+						return c.visibilityState === 'visible';					
+					});
+					if(client !== undefined){
+						client.navigate('http://localhost:8080');
+						client.focus();
+					} else {
+						clients.openWindow('http://localhost:8080');
+					}
+					notification.close();
+				})
+			);
+	}
+});
+
+self.addEventListener('notificationclose' e => {
+	console.log('notification was closed' e);
+});
+
+self.addEventListener('push' e => {
+	console.log('Push notification received' , e);
+	var data = {title : 'New!' , content : 'Something new happened'};
+	if(e.data){
+		data = JSON.parse(e.data.text());
+	}
+	var options = {
+		body : data.content,
+		//icon : './images/icons/app-icon-96x96.png',
+		//badge : './images/icons/app-icon-96x96.png',
+	};
+
+	e.waitUntil(
+		self.registration.showNotification(data.title , options)
+	);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
