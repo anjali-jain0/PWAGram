@@ -1,10 +1,12 @@
 
+importScripts('./js/idb.js');
+importScripts('./js/utility.js');
+
 var staticCache = 'static-v1';
 var dynamicCache = 'dynamic-v1';
 var assests = {
 
 };
-
 
 self.addEventListener('install' , e => {
 	console.log('Service Worker installed');
@@ -74,14 +76,29 @@ self.addEventListener('fetch' , e => {
 	//var url = '';
 	//if(e.request.url.indexOf(url) > -1){
 	e.respondWith(
-		caches.open(dynamicCache)
-			.then(cache => 
-				return fetch(e.request)
+		////caches.open(dynamicCache)
+			//.then(cache => 
+				//return 
+				fetch(e.request)
 						.then(res => {
-							cache.put(e.request , res.clone());
+							//cache.put(e.request , res.clone());
+							var clonedRes = res.clone();
+							clearAllData('posts')
+								.then(() => {
+									return clonedRes.json();
+								})
+								.then(data => {
+									for(var key in data){
+										writeData('posts' , data[key])
+											// .then(() => {
+											// 	deleteItemFromData('posts' , key);
+											// });
+									}
+								});
 							return res;
 			})
-	)) //} else if (isInArray(e.request.url , assests)){
+	)
+	//) //} else if (isInArray(e.request.url , assests)){
 				// e.respondWith(
 				// 	caches.match(e.request)
 				// 	)
@@ -160,6 +177,37 @@ self.addEventListener('push' e => {
 	e.waitUntil(
 		self.registration.showNotification(data.title , options)
 	);
+});
+
+self.addEventListener('sync' , e => {
+	if(e.tag === 'sync-new-post'){
+		console.log('Syncing new posts');
+		e.waitUntil(
+			readAllData('sync-posts')
+				.then(data => {
+					for(var dt of data){
+						fetch('' , {
+							method : 'POST',
+							headers : {
+								'Content-Type' : 'application/json',
+								'Accept' : 'application/json'
+							},
+							body : JSON.stringify({
+								id : dt.id,
+								title : dt.title,
+								location : dt.location,
+								image : ''
+							})
+						})
+						.then(res => {
+							console.log('Send data' , res);
+							if(res.ok) deleteItemFromData('sync-posts' , dt.id);
+						})
+						.catch(err => console.log(err));
+					}
+				})
+		)
+	}
 });
 
 
